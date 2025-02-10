@@ -45,3 +45,4 @@
 /Users/ozoezeutobi/Documents/Task/PatientMangementApi/bin/Debug/net9.0/Swashbuckle.AspNetCore.Swagger.dll
 /Users/ozoezeutobi/Documents/Task/PatientMangementApi/bin/Debug/net9.0/Swashbuckle.AspNetCore.SwaggerGen.dll
 /Users/ozoezeutobi/Documents/Task/PatientMangementApi/bin/Debug/net9.0/Swashbuckle.AspNetCore.SwaggerUI.dll
+/Users/ozoezeutobi/Documents/Task/PatientMangementApi/obj/Debug/net9.0/PatientMangementApi.sourcelink.json
