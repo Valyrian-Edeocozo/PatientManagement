@@ -2,7 +2,12 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using PatientMangementApi.PensionManagement.Application;
+using PatientMangementApi.PensionManagement.Application.Implementation;
+using PatientMangementApi.PensionManagement.Application.Interface;
+using PatientMangementApi.PensionManagement.Domain;
 using PatientMangementApi.PensionManagement.Infrastructure;
+using PatientMangementApi.PensionManagement.Infrastructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +28,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 builder.Services.AddControllers();
+builder.Services.AddScoped<IRepository<Patient>, Repository<Patient>>();
+builder.Services.AddScoped<IRepository<PatientRecord>, Repository<PatientRecord>>();
+builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IPatientRecordService, PatientRecordService>();
+
 
 var app = builder.Build();
 

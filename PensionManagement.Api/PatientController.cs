@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PatientMangementApi.PensionManagement.Application;
 using PatientMangementApi.PensionManagement.Application.command;
 using PatientMangementApi.PensionManagement.Application.commands;
 using PatientMangementApi.PensionManagement.Domain;
@@ -18,31 +19,15 @@ namespace PatientMangementApi.PensionManagement.Api
 {
     [Route("api/v1/patient")]
     [ApiController]
-    public class PatientController(AppDbContext context) : ApiControllerBase
+    public class PatientController(AppDbContext context, IPatientService patientService) : ApiControllerBase
     {
         private readonly AppDbContext _context = context;
+        private readonly IPatientService _patientService = patientService;
 
         [HttpPost("createpatient")]
         public async Task<IActionResult> CreatePatient(CreatePatientCommand command)
         {
-            var patient = new Patient
-            {
-                LastName = command.LastName,
-                FirstName = command.FirstName,
-                DateOfBirth = command.DateOfBirth,
-                PatientRecords = new List<PatientRecord>
-                {
-                    new PatientRecord
-                    {
-                        Description = command.Description,
-                        RecordDate = DateTime.Now,
-                    }
-                }
-            };
-
-            await _context.AddAsync(patient);
-            await _context.SaveChangesAsync();
-
+            var patient = await _patientService.CreatePatient(command);
             return Ok(new { Name = patient.LastName + " " + patient.FirstName, message = $"Patient creatinon for {patient.FirstName} was successful", });
         }
 
@@ -50,9 +35,7 @@ namespace PatientMangementApi.PensionManagement.Api
         public async Task<IActionResult> GetAllPatient()
         {
             
-            var patients = _context.Patients.AsParallel().Where(p => p.IsDeleted == false).ToList();
-            await Task.CompletedTask;
-
+            var patients = await _patientService.GetAllPatient();
             return Ok(patients);
 
         }
@@ -61,9 +44,7 @@ namespace PatientMangementApi.PensionManagement.Api
         public async Task<IActionResult> GetPatient([FromQuery] int id)
         {
             
-            var patient = _context.Patients.FirstOrDefault(p => p.Id == id && p.IsDeleted == false);
-            await Task.CompletedTask;
-
+            var patient = await _patientService.GetPatientById(id);
             return Ok(patient);
 
         }
@@ -72,24 +53,18 @@ namespace PatientMangementApi.PensionManagement.Api
         public async Task<IActionResult> DeletePatient([FromQuery] int id)
         {
             
-            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Id == id);
-            patient.IsDeleted = true;
-            await _context.SaveChangesAsync();
+            var isdeleted = await _patientService.DeletePatient(id);
+            if (isdeleted)
+               return Ok(new { message = $"Patient with id {id} deleted succesfully" });
 
-            return Ok(patient);
-
+            return BadRequest(new { message = "Process failed" });
         }
 
         [HttpPost("updatepatient")]
         public async Task<IActionResult> UpdatePatient(UpdatePatientDto command)
         {
             
-            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.Id == command.PatientId);
-            patient.LastName = command.LastName;
-            patient.FirstName = command.FirstName;
-            patient.DateOfBirth = command.DateOfBirth;
-
-            await _context.SaveChangesAsync();
+            var patient = await _patientService.UpdatePatient(command);
 
             return Ok(patient);
 
